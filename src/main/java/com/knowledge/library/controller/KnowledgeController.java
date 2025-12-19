@@ -1,11 +1,12 @@
 package com.knowledge.library.controller;
 
 import com.knowledge.library.domain.Knowledge;
-import com.knowledge.library.dto.CompositeKnowledgeRequest;
-import com.knowledge.library.dto.LinkKnowledgeRequest;
-import com.knowledge.library.dto.QuoteKnowledgeRequest;
-import com.knowledge.library.dto.TextKnowledgeRequest;
+import com.knowledge.library.dto.request.CompositeKnowledgeRequest;
+import com.knowledge.library.dto.request.LinkKnowledgeRequest;
+import com.knowledge.library.dto.request.QuoteKnowledgeRequest;
+import com.knowledge.library.dto.request.TextKnowledgeRequest;
 import com.knowledge.library.service.KnowledgeService;
+import com.knowledge.library.util.BaseResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,7 @@ public class KnowledgeController {
 
 
     @PostMapping("/text")
-    public Knowledge createText(@Valid @RequestBody TextKnowledgeRequest request) {
+    public BaseResponse createText(@Valid @RequestBody TextKnowledgeRequest request) {
         return knowledgeService.createText(
                 request.getTitle(),
                 request.getDescription(),
@@ -32,7 +33,7 @@ public class KnowledgeController {
     }
 
     @PostMapping("/link")
-    public Knowledge createLink(@Valid @RequestBody LinkKnowledgeRequest request) {
+    public BaseResponse createLink(@Valid @RequestBody LinkKnowledgeRequest request) {
         return knowledgeService.createLink(
                 request.getTitle(),
                 request.getDescription(),
@@ -41,7 +42,7 @@ public class KnowledgeController {
     }
 
     @PostMapping("/quote")
-    public Knowledge createQuote(@Valid @RequestBody QuoteKnowledgeRequest request) {
+    public BaseResponse createQuote(@Valid @RequestBody QuoteKnowledgeRequest request) {
         return knowledgeService.createQuote(
                 request.getTitle(),
                 request.getDescription(),
@@ -51,7 +52,7 @@ public class KnowledgeController {
     }
 
     @PostMapping("/composite")
-    public Knowledge createComposite(
+    public BaseResponse createComposite(
             @Valid @RequestBody CompositeKnowledgeRequest request) {
 
         return knowledgeService.createComposite(
@@ -62,17 +63,17 @@ public class KnowledgeController {
     }
 
     @GetMapping
-    public List<Knowledge> getAll() {
+    public BaseResponse getAll() {
         return knowledgeService.getAll();
     }
 
     @GetMapping("/{id}")
-    public Knowledge getById(@PathVariable Long id) {
+    public BaseResponse getById(@PathVariable Long id) {
         return knowledgeService.getById(id);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        knowledgeService.delete(id);
+    public BaseResponse delete(@PathVariable Long id) {
+        return knowledgeService.delete(id);
     }
 }

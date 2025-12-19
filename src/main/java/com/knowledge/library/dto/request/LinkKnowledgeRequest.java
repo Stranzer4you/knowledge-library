@@ -1,20 +1,21 @@
-package com.knowledge.library.dto;
-
+package com.knowledge.library.dto.request;
 import com.knowledge.library.util.ExceptionConstants;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
-import java.util.Set;
-
 @Data
-public class CompositeKnowledgeRequest {
+public class LinkKnowledgeRequest {
+
     @NotBlank(message = ExceptionConstants.MANDATORY_TITLE)
     private String title;
 
     @NotBlank(message = ExceptionConstants.MANDATORY_DESCRIPTION)
     private String description;
 
-    @NotEmpty(message = ExceptionConstants.MANDATORY_KNOWLEDGE_IDS)
-    private Set<Long> knowledgeIds;
+    @NotBlank(message = ExceptionConstants.MANDATORY_URL)
+    @Pattern(regexp = "https?://.*",message = ExceptionConstants.INVALID_URL_FORMAT)
+    private String url;
 }
+
+

@@ -2,24 +2,25 @@ package com.knowledge.library.service;
 
 
 import com.knowledge.library.domain.Knowledge;
+import com.knowledge.library.util.BaseResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
 
 public interface KnowledgeService {
-    Knowledge createText(String title, String description, String content);
+    BaseResponse createText(String title, String description, String content);
 
-    Knowledge createLink(String title, String description, String url);
+    BaseResponse createLink(String title, String description, String url);
 
-    Knowledge createQuote(String title, String description, String quoteText, String author);
+    BaseResponse createQuote(String title, String description, String quoteText, String author);
 
-    Knowledge createComposite(String title, String description, Set<Long> childKnowledgeIds);
+    BaseResponse createComposite(String title, String description, Set<Long> childKnowledgeIds);
 
-    List<Knowledge> getAll();
+    BaseResponse getAll();
 
-    Knowledge getById(Long id);
+    BaseResponse getById(Long id);
 
-    void delete(Long id);
+    BaseResponse delete(Long id);
 
 }
