@@ -10,4 +10,5 @@ public class ExceptionConstants {
     public static final String MANDATORY_QUOTE_TEXT = "Quote is mandatory";
     public static final String MANDATORY_AUTHOR = "Author is mandatory";
     public static final String MANDATORY_CONTENT = "Content is mandatory";
+    public static final String INVALID_KNOWLEDGE_ID = "Invalid Knowledge ID";
 }
