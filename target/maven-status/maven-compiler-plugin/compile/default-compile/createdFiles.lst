@@ -1,0 +1,6 @@
+com/knowledge/library/exceptions/ErrorResponse.class
+com/knowledge/library/KnowledgeLibraryApplication.class
+com/knowledge/library/config/SecurityConfig.class
+com/knowledge/library/exceptions/BadRequestException.class
+com/knowledge/library/exceptions/GlobalExceptionHandler.class
+com/knowledge/library/exceptions/MethodArgumentNotValidExceptionResponse.class
