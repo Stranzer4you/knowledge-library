@@ -1,6 +1,11 @@
+com/knowledge/library/domain/QuoteKnowledge.class
 com/knowledge/library/exceptions/ErrorResponse.class
+com/knowledge/library/domain/Knowledge.class
+com/knowledge/library/domain/CompositeKnowledge.class
+com/knowledge/library/domain/LinkKnowledge.class
 com/knowledge/library/KnowledgeLibraryApplication.class
 com/knowledge/library/config/SecurityConfig.class
 com/knowledge/library/exceptions/BadRequestException.class
 com/knowledge/library/exceptions/GlobalExceptionHandler.class
 com/knowledge/library/exceptions/MethodArgumentNotValidExceptionResponse.class
+com/knowledge/library/domain/TextKnowledge.class
