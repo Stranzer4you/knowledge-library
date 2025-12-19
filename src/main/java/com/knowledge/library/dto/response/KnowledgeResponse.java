@@ -1,4 +1,4 @@
-package com.knowledge.library.dto;
+package com.knowledge.library.dto.response;
 
 import lombok.Data;
 
