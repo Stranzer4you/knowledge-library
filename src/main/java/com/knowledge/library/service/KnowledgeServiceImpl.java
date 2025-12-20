@@ -11,11 +11,13 @@ import com.knowledge.library.exceptions.ConflictException;
 import com.knowledge.library.exceptions.ResourceNotFoundException;
 import com.knowledge.library.repository.KnowledgeRepository;
 import com.knowledge.library.util.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,6 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class KnowledgeServiceImpl implements KnowledgeService {
 
     @Value("${knowledge.pagination.page-size}")
@@ -43,35 +46,46 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public BaseResponse createText(String title, String description, String content) {
-        checkForExistingKnowledge(KnowledgeType.TextKnowledge.name(),title);
+        log.info("Starting Create Text Operation");
+        checkForExistingKnowledge(KnowledgeType.TextKnowledge.name(), title);
         TextKnowledge knowledge = new TextKnowledge(title, description, content);
         knowledge = knowledgeRepository.save(knowledge);
         TextKnowledgeResponse response = mapper.convertTextDomainToResponse(knowledge);
+        log.info("Create Text operation succeeded");
         return BaseResponseUtility.getBaseResponse(response);
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public BaseResponse createLink(String title, String description, String url) {
-        checkForExistingKnowledge(KnowledgeType.LinkKnowledge.name(),title);
+        log.info("Starting Create Link Operation");
+        checkForExistingKnowledge(KnowledgeType.LinkKnowledge.name(), title);
         LinkKnowledge knowledge = new LinkKnowledge(title, description, url);
         knowledge = knowledgeRepository.save(knowledge);
         LinkKnowledgeResponse response = mapper.convertLinkDomainToResponse(knowledge);
+        log.info("Create Link operation succeeded");
         return BaseResponseUtility.getBaseResponse(response);
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public BaseResponse createQuote(String title, String description, String quoteText, String author) {
-        checkForExistingKnowledge(KnowledgeType.QuoteKnowledge.name(),title);
+        log.info("Starting Create Quote operation");
+        checkForExistingKnowledge(KnowledgeType.QuoteKnowledge.name(), title);
         QuoteKnowledge knowledge = new QuoteKnowledge(title, description, quoteText, author);
         knowledge = knowledgeRepository.save(knowledge);
         QuoteKnowledgeResponse response = mapper.convertQuoteDomainToResponse(knowledge);
+        log.info("Create Quote operation succeeded");
         return BaseResponseUtility.getBaseResponse(response);
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     public BaseResponse createComposite(String title, String description, Set<Long> childKnowledgeIds) {
+        log.info("Starting Create Composite operation");
         CompositeKnowledge composite = new CompositeKnowledge(title, description);
         CompositeKnowledge finalComposite = composite;
         childKnowledgeIds.forEach(id -> {
@@ -80,17 +94,21 @@ public class KnowledgeServiceImpl implements KnowledgeService {
         });
 
         composite = knowledgeRepository.save(composite);
+        log.info("Create Composite operation succeeded");
         return BaseResponseUtility.getBaseResponse(composite);
     }
 
     @Override
     public BaseResponse getById(Long id) {
+        log.info("Starting Get Knowledge By Id operation ");
         Knowledge knowledge = fetchKnowledgeById(id);
+        log.info("Get Knowledge By Id operation succeeded");
         return BaseResponseUtility.getBaseResponse(knowledge);
     }
 
     @Override
     public BaseResponse getAll(KnowledgePageRequest request) {
+        log.info("Starting Get All Knowledge operation");
 
         long totalRecords = knowledgeRepository.count();
         Long totalPages = (long) Math.ceil((double) totalRecords / pageSize);
@@ -143,13 +161,17 @@ public class KnowledgeServiceImpl implements KnowledgeService {
                         .toList()
         );
 
+        log.info("Get All Knowledge Operation succeeded");
         return BaseResponseUtility.getBaseResponse(response);
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public BaseResponse delete(Long id) {
+        log.info("Starting Delete Knowledge by Id operation");
         fetchKnowledgeById(id);
         knowledgeRepository.deleteById(id);
+        log.info("Delete Knowledge by Id operation succeeded");
         return BaseResponseUtility.getBaseResponse();
     }
 
@@ -169,9 +191,9 @@ public class KnowledgeServiceImpl implements KnowledgeService {
         }
     }
 
-    public void checkForExistingKnowledge(String type,String title){
-        Knowledge existingKnowledge = knowledgeRepository.findByTitleAndKnowledgeType(title,type);
-        if(!ObjectUtils.isEmpty(existingKnowledge)){
+    public void checkForExistingKnowledge(String type, String title) {
+        Knowledge existingKnowledge = knowledgeRepository.findByTitleAndKnowledgeType(title, type);
+        if (!ObjectUtils.isEmpty(existingKnowledge)) {
             throw new ConflictException(ExceptionConstants.KNOWLEDGE_ALREADY_EXISTS);
         }
     }
