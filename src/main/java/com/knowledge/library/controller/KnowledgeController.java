@@ -1,10 +1,7 @@
 package com.knowledge.library.controller;
 
 import com.knowledge.library.domain.Knowledge;
-import com.knowledge.library.dto.request.CompositeKnowledgeRequest;
-import com.knowledge.library.dto.request.LinkKnowledgeRequest;
-import com.knowledge.library.dto.request.QuoteKnowledgeRequest;
-import com.knowledge.library.dto.request.TextKnowledgeRequest;
+import com.knowledge.library.dto.request.*;
 import com.knowledge.library.service.KnowledgeService;
 import com.knowledge.library.util.BaseResponse;
 import jakarta.validation.Valid;
@@ -63,8 +60,8 @@ public class KnowledgeController {
     }
 
     @GetMapping
-    public BaseResponse getAll() {
-        return knowledgeService.getAll();
+    public BaseResponse getAll(@Valid @ModelAttribute KnowledgePageRequest request) {
+        return knowledgeService.getAll(request);
     }
 
     @GetMapping("/{id}")

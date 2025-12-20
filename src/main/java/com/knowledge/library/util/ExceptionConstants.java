@@ -11,4 +11,8 @@ public class ExceptionConstants {
     public static final String MANDATORY_AUTHOR = "Author is mandatory";
     public static final String MANDATORY_CONTENT = "Content is mandatory";
     public static final String INVALID_KNOWLEDGE_ID = "Invalid Knowledge ID";
+    public static final String PAGE_NUMBER_MUST_BE_GREATER_THAN_EQUAL_ONE = "Page Number must be >= 1";
+    public static final String INVALID_SORT_FIELD = "SortBy field must be either TITLE or CREATED_AT";
+    public static final String INVALID_SORT_ORDER = "Invalid sortOrder value. Allowed values: ASC or DESC";
+    public static final String INVALID_KNOWLEDGE_TYPE = "Invalid knowledge type. Allowed values : LinkKnowledge or TextKnowledge or QuoteKnowledge";
 }

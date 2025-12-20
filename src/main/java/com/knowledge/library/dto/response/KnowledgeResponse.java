@@ -9,6 +9,8 @@ import java.util.List;
 
 @Data
 public class KnowledgeResponse {
+    private Long totalPages;
+    private Integer pageNumber;
     private List<LinkKnowledgeResponse> linkKnowledgeList;
     private List<TextKnowledgeResponse> textKnowledgeList;
     private List<QuoteKnowledgeResponse> quoteKnowledgeList;

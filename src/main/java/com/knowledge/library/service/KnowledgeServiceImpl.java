@@ -1,17 +1,19 @@
 package com.knowledge.library.service;
 
 import com.knowledge.library.domain.*;
+import com.knowledge.library.dto.request.KnowledgePageRequest;
 import com.knowledge.library.dto.response.KnowledgeResponse;
 import com.knowledge.library.dto.response.LinkKnowledgeResponse;
 import com.knowledge.library.dto.response.QuoteKnowledgeResponse;
 import com.knowledge.library.dto.response.TextKnowledgeResponse;
 import com.knowledge.library.exceptions.BadRequestException;
 import com.knowledge.library.repository.KnowledgeRepository;
-import com.knowledge.library.util.BaseResponse;
-import com.knowledge.library.util.BaseResponseUtility;
-import com.knowledge.library.util.ExceptionConstants;
-import com.knowledge.library.util.UtilityMapper;
-import lombok.extern.slf4j.Slf4j;
+import com.knowledge.library.util.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,6 +26,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class KnowledgeServiceImpl implements KnowledgeService {
+
+    @Value("${knowledge.pagination.page-size}")
+    private int pageSize;
+
 
     private final KnowledgeRepository knowledgeRepository;
     private final UtilityMapper mapper;
@@ -53,7 +59,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     public BaseResponse createQuote(String title, String description, String quoteText, String author) {
         QuoteKnowledge knowledge = new QuoteKnowledge(title, description, quoteText, author);
         knowledge = knowledgeRepository.save(knowledge);
-        QuoteKnowledgeResponse response  = mapper.convertQuoteDomainToResponse(knowledge);
+        QuoteKnowledgeResponse response = mapper.convertQuoteDomainToResponse(knowledge);
         return BaseResponseUtility.getBaseResponse(response);
     }
 
@@ -78,30 +84,56 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     }
 
     @Override
-    public BaseResponse getAll() {
-        List<Knowledge> all = knowledgeRepository.findAll();
+    public BaseResponse getAll(KnowledgePageRequest request) {
+
+        long totalRecords = knowledgeRepository.count();
+        Long totalPages = (long) Math.ceil((double) totalRecords / pageSize);
+
+        KnowledgeSortField sortField = KnowledgeSortField.from(request.getSortBy());
+
+        Pageable pageable = PageRequest.of(request.getPageNo() - 1, pageSize, Sort.by(resolveSortDirection(request.getSortOrder()), sortField.getField()));
+        Page<Knowledge> page;
+
+        if (request.getType() != null) {
+            KnowledgeType knowledgeType = KnowledgeType.from(request.getType());
+            page = knowledgeRepository.findByKnowledgeType(knowledgeType.name(), pageable);
+        } else {
+            page = knowledgeRepository.findAll(pageable);
+        }
+
         KnowledgeResponse response = new KnowledgeResponse();
+        response.setPageNumber(request.getPageNo());
+        response.setTotalPages(totalPages);
+
+        List<Knowledge> knowledgeList = page.getContent();
+        Map<KnowledgeType, List<Knowledge>> groupedByType =
+                knowledgeList.stream()
+                        .collect(Collectors.groupingBy(
+                                k -> KnowledgeType.from(k.getKnowledgeType())
+                        ));
+
+
         response.setLinkKnowledgeList(
-                all.stream()
-                        .filter(LinkKnowledge.class::isInstance)
-                        .map(LinkKnowledge.class::cast)
-                        .map(mapper::convertLinkDomainToResponse)
+                groupedByType
+                        .getOrDefault(KnowledgeType.LinkKnowledge, List.of())
+                        .stream()
+                        .map(k -> mapper.convertLinkDomainToResponse((LinkKnowledge) k))
                         .toList()
         );
 
         response.setTextKnowledgeList(
-                all.stream()
-                        .filter(TextKnowledge.class::isInstance)
-                        .map(TextKnowledge.class::cast)
-                        .map(mapper::convertTextDomainToResponse)
+                groupedByType
+                        .getOrDefault(KnowledgeType.TextKnowledge, List.of())
+                        .stream()
+                        .map(k -> mapper.convertTextDomainToResponse((TextKnowledge) k))
                         .toList()
         );
 
         response.setQuoteKnowledgeList(
-                all.stream()
-                        .filter(QuoteKnowledge.class::isInstance)
-                        .map(QuoteKnowledge.class::cast)
-                        .map(mapper::convertQuoteDomainToResponse)
+                groupedByType
+                        .getOrDefault(KnowledgeType.QuoteKnowledge, List.of())
+                        .stream()
+                        .map(k -> mapper.convertQuoteDomainToResponse((QuoteKnowledge) k))
                         .toList()
         );
 
@@ -120,5 +152,14 @@ public class KnowledgeServiceImpl implements KnowledgeService {
                         new BadRequestException(ExceptionConstants.INVALID_KNOWLEDGE_ID));
     }
 
+    private Sort.Direction resolveSortDirection(String sortOrder) {
+        try {
+            return Sort.Direction.valueOf(sortOrder.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException(
+                    ExceptionConstants.INVALID_SORT_ORDER
+            );
+        }
+    }
 }
 

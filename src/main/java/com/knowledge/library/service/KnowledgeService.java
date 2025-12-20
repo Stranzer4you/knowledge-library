@@ -2,6 +2,7 @@ package com.knowledge.library.service;
 
 
 import com.knowledge.library.domain.Knowledge;
+import com.knowledge.library.dto.request.KnowledgePageRequest;
 import com.knowledge.library.util.BaseResponse;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ public interface KnowledgeService {
 
     BaseResponse createComposite(String title, String description, Set<Long> childKnowledgeIds);
 
-    BaseResponse getAll();
+    BaseResponse getAll(KnowledgePageRequest request);
 
     BaseResponse getById(Long id);
 
