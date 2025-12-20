@@ -132,10 +132,12 @@ public class KnowledgeServiceImpl implements KnowledgeService {
         List<Knowledge> knowledgeList = page.getContent();
         Map<KnowledgeType, List<Knowledge>> groupedByType =
                 knowledgeList.stream()
-                        .collect(Collectors.groupingBy(
-                                k -> KnowledgeType.from(k.getKnowledgeType())
-                        ));
-
+                        .collect(Collectors.groupingBy(k -> {
+                            if (k instanceof LinkKnowledge) return KnowledgeType.LinkKnowledge;
+                            if (k instanceof TextKnowledge) return KnowledgeType.TextKnowledge;
+                            if (k instanceof QuoteKnowledge) return KnowledgeType.QuoteKnowledge;
+                            throw new BadRequestException(ExceptionConstants.INVALID_KNOWLEDGE_TYPE);
+                        }));
 
         response.setLinkKnowledgeList(
                 groupedByType
