@@ -7,6 +7,8 @@ import com.knowledge.library.dto.response.LinkKnowledgeResponse;
 import com.knowledge.library.dto.response.QuoteKnowledgeResponse;
 import com.knowledge.library.dto.response.TextKnowledgeResponse;
 import com.knowledge.library.exceptions.BadRequestException;
+import com.knowledge.library.exceptions.ConflictException;
+import com.knowledge.library.exceptions.ResourceNotFoundException;
 import com.knowledge.library.repository.KnowledgeRepository;
 import com.knowledge.library.util.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -41,6 +44,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     @Override
     public BaseResponse createText(String title, String description, String content) {
+        checkForExistingKnowledge(KnowledgeType.TextKnowledge.name(),title);
         TextKnowledge knowledge = new TextKnowledge(title, description, content);
         knowledge = knowledgeRepository.save(knowledge);
         TextKnowledgeResponse response = mapper.convertTextDomainToResponse(knowledge);
@@ -49,6 +53,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     @Override
     public BaseResponse createLink(String title, String description, String url) {
+        checkForExistingKnowledge(KnowledgeType.LinkKnowledge.name(),title);
         LinkKnowledge knowledge = new LinkKnowledge(title, description, url);
         knowledge = knowledgeRepository.save(knowledge);
         LinkKnowledgeResponse response = mapper.convertLinkDomainToResponse(knowledge);
@@ -57,6 +62,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     @Override
     public BaseResponse createQuote(String title, String description, String quoteText, String author) {
+        checkForExistingKnowledge(KnowledgeType.QuoteKnowledge.name(),title);
         QuoteKnowledge knowledge = new QuoteKnowledge(title, description, quoteText, author);
         knowledge = knowledgeRepository.save(knowledge);
         QuoteKnowledgeResponse response = mapper.convertQuoteDomainToResponse(knowledge);
@@ -142,6 +148,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
 
     @Override
     public BaseResponse delete(Long id) {
+        fetchKnowledgeById(id);
         knowledgeRepository.deleteById(id);
         return BaseResponseUtility.getBaseResponse();
     }
@@ -149,7 +156,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     public Knowledge fetchKnowledgeById(Long id) {
         return knowledgeRepository.findById(id)
                 .orElseThrow(() ->
-                        new BadRequestException(ExceptionConstants.INVALID_KNOWLEDGE_ID));
+                        new ResourceNotFoundException(ExceptionConstants.INVALID_KNOWLEDGE_ID));
     }
 
     private Sort.Direction resolveSortDirection(String sortOrder) {
@@ -159,6 +166,13 @@ public class KnowledgeServiceImpl implements KnowledgeService {
             throw new BadRequestException(
                     ExceptionConstants.INVALID_SORT_ORDER
             );
+        }
+    }
+
+    public void checkForExistingKnowledge(String type,String title){
+        Knowledge existingKnowledge = knowledgeRepository.findByTitleAndKnowledgeType(title,type);
+        if(!ObjectUtils.isEmpty(existingKnowledge)){
+            throw new ConflictException(ExceptionConstants.KNOWLEDGE_ALREADY_EXISTS);
         }
     }
 }

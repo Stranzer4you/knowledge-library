@@ -12,4 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface KnowledgeRepository extends JpaRepository<Knowledge, Long> {
     @Query("SELECT k FROM Knowledge k WHERE k.knowledgeType = :type")
     Page<Knowledge> findByKnowledgeType(@Param("type") String type, Pageable pageable);
+
+    Knowledge findByTitleAndKnowledgeType(String title, String name);
 }

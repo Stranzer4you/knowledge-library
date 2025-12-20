@@ -15,4 +15,5 @@ public class ExceptionConstants {
     public static final String INVALID_SORT_FIELD = "SortBy field must be either TITLE or CREATED_AT";
     public static final String INVALID_SORT_ORDER = "Invalid sortOrder value. Allowed values: ASC or DESC";
     public static final String INVALID_KNOWLEDGE_TYPE = "Invalid knowledge type. Allowed values : LinkKnowledge or TextKnowledge or QuoteKnowledge";
+    public static final String KNOWLEDGE_ALREADY_EXISTS = "Knowledge already exists with same title and type";
 }

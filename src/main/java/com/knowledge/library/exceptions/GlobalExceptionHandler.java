@@ -13,17 +13,31 @@ public class GlobalExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BadRequestException.class)
-    public ErrorResponse handleBadRequestException(Exception ex){
-        return new ErrorResponse(400,ex.getMessage());
+    public ErrorResponse handleBadRequestException(Exception ex) {
+        return new ErrorResponse(400, ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public MethodArgumentNotValidExceptionResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException ex){
+    public MethodArgumentNotValidExceptionResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         MethodArgumentNotValidExceptionResponse dto = new MethodArgumentNotValidExceptionResponse();
-        List<String> errors = ex.getBindingResult().getFieldErrors().stream().map(s-> s.getField() + " : " + s.getDefaultMessage()).toList();
+        List<String> errors = ex.getBindingResult().getFieldErrors().stream().map(s -> s.getField() + " : " + s.getDefaultMessage()).toList();
         dto.setStatus(400);
         dto.setMessages(errors);
-        return  dto;
+        return dto;
     }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFound(ResourceNotFoundException ex) {
+        return new ErrorResponse(404, ex.getMessage());
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConflict(ConflictException ex) {
+        return new ErrorResponse(409, ex.getMessage());
+    }
+
+
 }
