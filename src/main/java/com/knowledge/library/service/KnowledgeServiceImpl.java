@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -43,8 +44,9 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public BaseResponse createText(String title, String description, String content) {
-        checkForExistingKnowledge(KnowledgeType.TextKnowledge.name(),title);
+        checkForExistingKnowledge(KnowledgeType.TextKnowledge.name(), title);
         TextKnowledge knowledge = new TextKnowledge(title, description, content);
         knowledge = knowledgeRepository.save(knowledge);
         TextKnowledgeResponse response = mapper.convertTextDomainToResponse(knowledge);
@@ -52,8 +54,9 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public BaseResponse createLink(String title, String description, String url) {
-        checkForExistingKnowledge(KnowledgeType.LinkKnowledge.name(),title);
+        checkForExistingKnowledge(KnowledgeType.LinkKnowledge.name(), title);
         LinkKnowledge knowledge = new LinkKnowledge(title, description, url);
         knowledge = knowledgeRepository.save(knowledge);
         LinkKnowledgeResponse response = mapper.convertLinkDomainToResponse(knowledge);
@@ -61,8 +64,9 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public BaseResponse createQuote(String title, String description, String quoteText, String author) {
-        checkForExistingKnowledge(KnowledgeType.QuoteKnowledge.name(),title);
+        checkForExistingKnowledge(KnowledgeType.QuoteKnowledge.name(), title);
         QuoteKnowledge knowledge = new QuoteKnowledge(title, description, quoteText, author);
         knowledge = knowledgeRepository.save(knowledge);
         QuoteKnowledgeResponse response = mapper.convertQuoteDomainToResponse(knowledge);
@@ -70,6 +74,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     public BaseResponse createComposite(String title, String description, Set<Long> childKnowledgeIds) {
         CompositeKnowledge composite = new CompositeKnowledge(title, description);
@@ -147,6 +152,7 @@ public class KnowledgeServiceImpl implements KnowledgeService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public BaseResponse delete(Long id) {
         fetchKnowledgeById(id);
         knowledgeRepository.deleteById(id);
@@ -169,9 +175,9 @@ public class KnowledgeServiceImpl implements KnowledgeService {
         }
     }
 
-    public void checkForExistingKnowledge(String type,String title){
-        Knowledge existingKnowledge = knowledgeRepository.findByTitleAndKnowledgeType(title,type);
-        if(!ObjectUtils.isEmpty(existingKnowledge)){
+    public void checkForExistingKnowledge(String type, String title) {
+        Knowledge existingKnowledge = knowledgeRepository.findByTitleAndKnowledgeType(title, type);
+        if (!ObjectUtils.isEmpty(existingKnowledge)) {
             throw new ConflictException(ExceptionConstants.KNOWLEDGE_ALREADY_EXISTS);
         }
     }
