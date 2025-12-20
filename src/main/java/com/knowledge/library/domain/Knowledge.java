@@ -22,6 +22,10 @@ public abstract class Knowledge {
 
     private final LocalDateTime createdAt;
 
+    @Column(name = "knowledge_type", insertable = false, updatable = false)
+    private String knowledgeType;
+
+
     protected Knowledge() {
         this.createdAt = LocalDateTime.now();
     }
