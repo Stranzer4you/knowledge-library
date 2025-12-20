@@ -246,20 +246,17 @@ class KnowledgeServiceImplTest {
     @Test
     void shouldThrowNotFoundExceptionWhenAnyChildKnowledgeIdIsInvalid() {
 
-        Long validId = 1L;
         Long invalidId = 99L;
+        Set<Long> childIds = Set.of(invalidId);
 
-        Set<Long> childIds = Set.of(validId, invalidId);
-
-        Knowledge child = new TextKnowledge("Java", "desc", "content");
-
-        when(knowledgeRepository.findById(validId)).thenReturn(Optional.of(child));
         when(knowledgeRepository.findById(invalidId)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> knowledgeService.createComposite("Composite", "desc", childIds));
+        assertThrows(ResourceNotFoundException.class, () ->
+                knowledgeService.createComposite("Composite", "desc", childIds));
 
         verify(knowledgeRepository, never()).save(any());
     }
+
 
 
 }

@@ -76,7 +76,7 @@ class KnowledgeControllerTest {
         mockMvc.perform(post("/knowledge/text")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.title").value("Java"));
     }
 
